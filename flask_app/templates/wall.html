@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+<div class="card mb-3">
+  <div class="card-body">
+    <h5 class="card-title mb-3">What's on your mind? Create a new post:</h5>
+    <form action="/posts/create" method="post">
+      <input type="hidden" name="user_id" value="{{ user.id }}">
+      <div class="mb-3">
+        <textarea name="content" id="content" class="form-control"></textarea>
+        {% if messages %}
+        {% for category, message in messages %}
+        {% if category == 'post_content' %}
+        <span class="form-text text-danger">{{ message }}</span>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+      </div>
+      <div class="d-flex justify-content-end">
+        <input type="submit" value="PUBLISH" class="btn btn-info">
+      </div>
+    </form>
+  </div>
+</div>
+<h2>All Community Posts:</h2>
+
+{% for post in posts %}
+  <div class="card border border-primary mb-3">
+    <div class="card-header">{{ post.poster.first_name }} - {{ post.created_at|datetime_format }}</div>
+    <div class="card-body">
+      {{ post.content }}
+      <hr>
+      {% if post.comments|length > 0 %}  
+        {% for comment in post.comments %}  
+          <div class="alert border border-secondary ms-5 my-3">
+            <p class="fw-bold mb-1">{{ comment.commenter.first_name }} - {{ comment.created_at|datetime_format }}</p>
+            <p class="mb-1">{{ comment.content }}</p>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form action="/comments/create" method="post" class="ms-5">
+        <input type="hidden" name="user_id" value="{{ user.id }}">
+        <input type="hidden" name="post_id" value="{{ post.id }}">
+        <label for="content" class="form-label">Add a comment:</label>
+        <div class="mb-3">
+          <textarea name="content" id="content" class="form-control"></textarea>
+          {% if messages %}
+          {% for category, message in messages %}
+          {% if category == 'comment_content' %}
+          <span class="form-text text-danger">{{ message }}</span>
+          {% endif %}
+          {% endfor %}
+          {% endif %}
+        </div>
+        <div class="d-flex justify-content-end">
+          <input type="submit" value="COMMENT" class="btn btn-sm btn-outline-info">
+        </div>
+      </form>
+
+    </div>
+  </div>
+{% endfor %}
+
+{% endwith %}
+{% endblock content %}
